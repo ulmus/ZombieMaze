@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ZombieMaze</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+    <link href="components/backbone-forms/distribution/templates/bootstrap.css" rel="stylesheet" />
+    <style>
+        .maze {
+        }
+        .tile {
+            float: left;
+            width: 50px;
+            height: 50px;
+            border: 1px solid black;
+        }
+        .tile-first-col {
+            clear: both;
+            border-left: 3px solid black;
+        }
+        .tile-last-col {
+            border-right: 3px solid black;
+        }
+        .tile-first-row {
+            border-top: 3px solid black;
+        }
+        .tile-last-row {
+            border-bottom: 3px solid black;
+        }
+        .tile-content {
+            width: 100%;
+            height: 100%;
+        }
+        .tile-type-WALL {
+            background: black;
+        }
+        .tile-type-START {
+            background: blue;
+        }
+        .tile-type-FINISH {
+            background: green;
+        }
+        .tile-type-TRAP {
+            background: red;
+        }
+    </style>
+</head>
+<body style="padding-top:40px;">
+<div class="row">
+    <div class="span11 offset1">
+        <h1>ZombieMaze!</h1>
+
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#tab-content-zombie" data-toggle="tab">The Zombie</a></li>
+            <li><a href="#tab-content-maze" data-toggle="tab">The Maze</a></li>
+        </ul>
+
+        <div class="tab-content">
+            <div class="tab-pane active" id="tab-content-zombie">
+                <div class="row">
+                    <div class="span10">
+                        <img src="assets/zombie_color.jpg">
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="tab-content-maze">
+                <div class="row">
+                    <div class="span8" id="maze-display"></div>
+                    <div class="span2 well">
+                        <div class="row">
+                            <div class="span2">
+                                <ul class="nav nav-list"  id="maze-list">
+                                </ul>
+                            </div>
+                            <div class="span2" id="maze-actions">
+                                <ul class="nav nav-list">
+                                    <li><a href="#" clasS="action-add-maze">Add maze</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script id="template-maze-list-item" type="text/x-handlebars-template">
+        <a href="#">{{name}}</a>
+</script>
+
+
+<script id="template-maze" type="text/x-handlebars-template">
+    <h3>{{name}}</h3>
+    <div class="btn-toolbar">
+        <button class="btn action-maze-edit">Edit Maze</button>
+        <button class="btn btn-danger action-maze-delete">Delete Maze</button>
+        Click tile to:<div class="btn-group">
+            <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                Click tile to set type to {{defaultTileType}}
+                <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu">
+                <li>
+                    <a href="#" class="action-maze-setDefaultTileType" data-type="PASS">PASS</a>
+                </li>
+                <li>
+                    <a href="#" class="action-maze-setDefaultTileType" data-type="WALL">WALL</a>
+                </li>
+                <li>
+                    <a href="#" class="action-maze-setDefaultTileType" data-type="TRAP">TRAP</a>
+                </li>
+                <li>
+                    <a href="#" class="action-maze-setDefaultTileType" data-type="START">START</a>
+                </li>
+                <li>
+                    <a href="#" class="action-maze-setDefaultTileType" data-type="FINISH">FINISH</a>
+                </li>
+                <!-- dropdown menu links -->
+            </ul>
+        </div>
+    </div>
+    <div class="maze"></div>
+</script>
+
+<script id="template-tile" type="text/x-handlebars-template">
+    <div class="tile-content tile-type-{{type}}"></div>
+</script>
+
+<script id="template-dialog" type="text/x-handlebars-template">
+    <div class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="{{header}}" aria-hidden="true">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3>{{header}}</h3>
+        </div>
+        <div class="modal-body">
+            {{{body}}}
+        </div>
+        <div class="modal-footer">
+        <button class="btn btn-close" data-dismiss="modal" aria-hidden="true">Avbryt</button>
+        <button class="btn btn-primary">Spara</button>
+        </div>
+    </div>
+</script>
+
+<script id="template-tile-popover" type="text/x-handlebars-template">
+    Current type: {{type}}
+    <button class="btn btn-block action-tile-setType" data-tile-type="PASS">PASS</button>
+    <button class="btn btn-block action-tile-setType" data-tile-type="WALL">WALL</button>
+</script>
+
+<script src="http://code.jquery.com/jquery-2.0.0.js"></script>
+<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+<script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
+<script>
+    Parse.initialize("ICQW709bF4XjHdThejpTQKfnlY4Kv9UScVJFCIxX", "uXPZjyHkbwsF43NA3mX32QVbfeKbKshopG82SxIa");
+</script>
+<!--<script src="http://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.0.0/backbone-min.js"></script>-->
+<script src="http://www.parsecdn.com/js/parse-1.2.8.min.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/handlebars.js/1.0.0/handlebars.min.js"></script>
+<!--<script src="http://cdnjs.cloudflare.com/ajax/libs/backbone-relational/0.8.5/backbone-relational.js"></script>-->
+<script src="http://cdnjs.cloudflare.com/ajax/libs/backbone.marionette/1.0.1-bundled/backbone.marionette.js"></script>
+<script>
+    Backbone.Marionette.TemplateCache.prototype.compileTemplate = function(rawTemplate) {
+        // use Handlebars.js to compile the template
+        return Handlebars.compile(rawTemplate);
+    };
+</script>
+
+<!--<script src="https://cdn.firebase.com/v0/firebase.js"></script>-->
+<!--<script src="components/backfire/backbone-firebase.js" type="text/javascript"></script>-->
+<!--<script src="components/backbone-parse/backbone-parse.js" type="text/javascript"></script>-->
+<script src="components/backbone-forms/distribution/backbone-forms.js" type="text/javascript"></script>
+<script src="components/backbone-forms/distribution/editors/list.js" type="text/javascript"></script>
+<script src="components/backbone-forms/distribution/adapters/backbone.bootstrap-modal.js" type="text/javascript"></script>
+<script src="components/backbone-forms/distribution/templates/bootstrap.js"></script>
+<script src="script/ZM.js"></script>
+<script src="script/MazeModel.js"></script>
+<script src="script/MazeCollection.js"></script>
+<script src="script/TileModel.js"></script>
+<script src="script/TileCollection.js"></script>
+<script src="script/TileView.js"></script>
+<script src="script/ClickItemView.js"></script>
+<script src="script/MazeActionView.js"></script>
+<script src="script/MazeListView.js"></script>
+<script src="script/MazeView.js"></script>
+<script src="script/App.js"></script>
+<script>
+</script>
+
+</body>
+</html>

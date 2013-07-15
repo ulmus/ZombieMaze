@@ -1,0 +1,9 @@
+{
+  "name": "backbone-parse",
+  "version": "0.0.0",
+  "commit": "afda24677f835fcc7f8d9b33624f9b8989c6af82",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/neebz/backbone-parse.git"
+  }
+}
